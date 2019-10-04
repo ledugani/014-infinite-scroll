@@ -4,7 +4,10 @@ import Contact from './contact';
 
 class ContactList extends React.Component {
   state = {
-    contacts: []
+    contacts: [],
+    per: 2,
+    page: 1,
+    totalPages: null,
   }
 
   componentWillMount() {
@@ -12,16 +15,32 @@ class ContactList extends React.Component {
   }
 
   loadContacts = () => {
-    fetch('https://xxx.example-api.com/contacts.json')
+    const { per, page, contacts } = this.state;
+    const url = `https://xxx.example-api.com/contacts.json?per=${per}&page=${page}`
+    fetch(url)
       .then(response => response.json())
       .then(json => this.setState({
-        contacts: json.contacts
+        contacts: [...contacts, ...json.contacts]
       }))
   }
 
-  render() {
-    return <ul>
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }))
+  }
 
-    </ul>
+  render() {
+    return <div>
+      <ul className="contacts">
+        {
+          this.state.contacts.map(contact => <li key={contact.id}>
+            <Contact {...contact} />
+          </li>)
+        }
+      </ul>
+      <a onClick={this.loadMore} href="">Load more</a>
+    </div>
+
   }
 }
