@@ -1,5 +1,5 @@
 import React from 'react';
-import ContactList from './features/contact-list'
+import ContactList from './features/contact-list/'
 
 function App() {
   return (

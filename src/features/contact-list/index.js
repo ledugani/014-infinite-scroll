@@ -8,10 +8,25 @@ class ContactList extends React.Component {
     per: 2,
     page: 1,
     totalPages: null,
+    scrolling: false
   }
 
   componentWillMount() {
     this.loadContacts()
+    this.scrollListener = window.addEventListener('scroll', (e) => {
+      this.handleScroll(e)
+    })
+  }
+
+  handleScroll = (e) => {
+    const { scrolling, totalPages, page } = this.state
+    if (scrolling) return
+    if (totalPages <= page) return
+    const lastLi = document.querySelector('ul.contacts > li:last-child')
+    const lastLiOffset = lastLi.offsetTop + lastLi.clientHeight
+    const pageOffset = window.pageYOffset + window.innerHeight
+    var bottomOffset = 20
+    if (pageOffset > lastLiOffset - bottomOffset) this.loadMore()
   }
 
   loadContacts = () => {
@@ -20,14 +35,17 @@ class ContactList extends React.Component {
     fetch(url)
       .then(response => response.json())
       .then(json => this.setState({
-        contacts: [...contacts, ...json.contacts]
+        contacts: [...contacts, ...json.contacts],
+        scrolling: false,
+        totalPages: json.total_pages,
       }))
   }
 
   loadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
-    }))
+      scrolling: true,
+    }), this.loadContacts)
   }
 
   render() {
@@ -39,8 +57,9 @@ class ContactList extends React.Component {
           </li>)
         }
       </ul>
-      <a onClick={this.loadMore} href="">Load more</a>
     </div>
 
   }
 }
+
+export default ContactList;
